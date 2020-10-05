@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+# from rest_framework_simplejwt.views import (
+#     TokenObtainPairView,
+#     TokenRefreshView,
+# )
 
 from .views import CommentViewSet, ReviewViewSet
 from .views import TitleViewSet, CategoryDestroy, CategoryListCreate, GenreListCreate, GenreDestroy
@@ -18,7 +18,6 @@ from .views import (
 router = DefaultRouter()
 
 router.register(r'users', UsersViewSet, basename='users')
-# router.register('titles', TitleViewSet)
 router.register(r'titles', TitleViewSet)
 router.register(r'titles/(?P<title_id>[0-9]+)/reviews', ReviewViewSet, basename='reviews')
 router.register(r'titles/(?P<title_id>[0-9]+)/reviews/(?P<review_id>[0-9]+)/comments', CommentViewSet, basename='comments')
