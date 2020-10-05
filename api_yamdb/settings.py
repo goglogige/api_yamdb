@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
+
 ]
 
 MIDDLEWARE = [
@@ -150,3 +152,4 @@ EMAIL_USE_TLS = True
 
 # Настройка для использования нашей модели User вместо модели по умолчанию
 AUTH_USER_MODEL = "api.User"
+
