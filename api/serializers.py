@@ -33,19 +33,6 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-# class TitleSerializer(serializers.ModelSerializer):
-#     category = CategorySerializer(many=False, read_only=True)
-#     genre = GenreSerializer(many=True, read_only=True)
-#     rating = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
-#         model = Title
-#
-#     def get_rating(self, obj):
-#         return sum([review.score for review in obj.reviews.all()]) / obj.reviews.count()
-
-
 class TitlePostSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',

@@ -122,7 +122,7 @@ class CategoryDestroy(generics.DestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated & IsAdminUser]
-    lookup_field = "slug"
+    lookup_field = 'slug'
 
 
 class GenreListCreate(generics.ListCreateAPIView):
@@ -137,7 +137,7 @@ class GenreDestroy(generics.DestroyAPIView):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsAuthenticated & IsAdminUser]
-    lookup_field = "slug"
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -151,8 +151,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('list', 'retrieve'):
             return TitleListSerializer
         return TitlePostSerializer
-
-    # serializer_class = TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
