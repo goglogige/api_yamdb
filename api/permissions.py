@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS    
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsAdministrator(BasePermission):
@@ -24,4 +24,16 @@ class OwnResourcePermission(BasePermission):
 class ReadOnly(BasePermission):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
+
+
+class IsAuthorOrIsStaffPermission(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return (
+                request.method not in ('PATCH', 'DELETE')
+                or (
+                        request.user == obj.author
+                        or request.user.is_staff
+                )
+        )
 

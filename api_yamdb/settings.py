@@ -19,6 +19,8 @@ load_dotenv()
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from datetime import timedelta
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -152,4 +154,12 @@ EMAIL_USE_TLS = True
 
 # Настройка для использования нашей модели User вместо модели по умолчанию
 AUTH_USER_MODEL = "api.User"
+
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    # ],
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+}
 
