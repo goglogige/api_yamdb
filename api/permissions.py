@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdministrator(BasePermission):
@@ -14,26 +14,22 @@ class IsAdministrator(BasePermission):
         )
 
 
-class OwnResourcePermission(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method not in SAFE_METHODS:
-            return request.user.is_superuser and request.user.is_authenticated
-        return True
-
-
 class ReadOnly(BasePermission):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
 
 
 class IsAuthorOrIsStaffPermission(BasePermission):
+    def has_permission(self, request, view):
+        return (request.method in SAFE_METHODS and
+                request.user.is_anonymous or
+                request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        return (
-                request.method not in ('PATCH', 'DELETE')
-                or (
-                        request.user == obj.author
-                        or request.user.is_staff
-                )
-        )
+        if request.method in ['PATCH', 'DELETE']:
+            return (obj.author == request.user or
+                    request.user.is_staff or
+                    request.user.is_superuser or
+                    request.user.role in ['admin', 'moderator'])
+        return True
 

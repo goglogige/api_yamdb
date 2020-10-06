@@ -1,8 +1,6 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
-from .models import Comment, Review
-from .models import User, Category, Genre, Title
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,7 +39,6 @@ class TitlePostSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all())
-    # rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
@@ -49,50 +46,35 @@ class TitlePostSerializer(serializers.ModelSerializer):
             'id', 'name', 'year',
             'description', 'genre', 'category',
         )
-
-    # def get_rating(self, obj):
-    #     return sum([review.score for review in obj.reviews.all()]) / obj.reviews.count()
 
 
 class TitleListSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    # rating = serializers.SerializerMethodField()
+    rating = serializers.FloatField()
 
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year',
+            'id', 'name', 'year', 'rating',
             'description', 'genre', 'category',
         )
-
-    # def get_rating(self, obj):
-    #     return sum([review.score for review in obj.reviews.all()]) / obj.reviews.count()
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
-
-    def get_rating(self, obj):
-        return sum([review.score for review in obj.reviews.all()]) / obj.reviews.count()
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
 
+    def validate(self, attrs):
+        author = self.context["request"].user.id,
+        title = self.context["view"].kwargs.get("title_id")
+        message = 'Author review already exist'
+        if not self.instance and Review.objects.filter(title=title, author=author).exists():
+            raise serializers.ValidationError(message)
+        return attrs
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author',),
-            )
-        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):

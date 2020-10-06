@@ -1,32 +1,25 @@
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, serializers
-from rest_framework import viewsets, filters, generics
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework import filters, generics, serializers, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .code import CODE
 from .filters import TitleFilter
-from .models import Category, Genre, Title
-from .models import Review
-from .models import User
-from .permissions import IsAdministrator
-from .permissions import IsAuthorOrIsStaffPermission
-from .permissions import ReadOnly
-from .serializers import (
-    CategorySerializer, GenreSerializer,
-    TitleListSerializer, TitlePostSerializer
-)
-from .serializers import CommentSerializer, ReviewSerializer, TitleSerializer
-from .serializers import UserSerializer, EmailSerializer, UserCreateSerializer
+from .models import Category, Genre, Review, Title, User
+from .permissions import IsAdministrator, IsAuthorOrIsStaffPermission, ReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          EmailSerializer, GenreSerializer, ReviewSerializer,
+                          TitleListSerializer, TitlePostSerializer,
+                          UserCreateSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -141,7 +134,7 @@ class GenreDestroy(generics.DestroyAPIView):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     permission_classes = [IsAuthenticated & IsAdminUser | ReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
@@ -166,13 +159,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        get_object_or_404(
+        title = get_object_or_404(
             Title,
             id=self.kwargs.get('title_id')
         )
         serializer.save(
             author=self.request.user,
-            title_id=self.kwargs.get('title_id')
+            title=title
         )
 
     def partial_update(self, request, *args, **kwargs):
@@ -183,7 +176,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         get_object_or_404(
             title.reviews,
             pk=self.kwargs.get('pk'),
-            title_id=self.kwargs.get('title_id')
+            title=title
         )
         return super().partial_update(request, *args, **kwargs)
 
@@ -206,14 +199,14 @@ class CommentViewSet(viewsets.ModelViewSet):
             Title,
             id=self.kwargs.get('title_id')
         )
-        get_object_or_404(
+        review = get_object_or_404(
             title.reviews,
             pk=self.kwargs.get('review_id'),
-            title_id=self.kwargs.get('title_id')
+            title=title
         )
         serializer.save(
             author=self.request.user,
-            review_id=self.kwargs.get('review_id')
+            review=review
         )
 
     def partial_update(self, request, *args, **kwargs):
@@ -224,12 +217,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(
             title.reviews,
             pk=self.kwargs.get('review_id'),
-            title_id=self.kwargs.get('title_id')
+            title=title
         )
         get_object_or_404(
             review.comments,
             pk=self.kwargs.get('pk'),
-            review_id=self.kwargs.get('review_id')
+            review=review
         )
         return super().partial_update(request, *args, **kwargs)
 

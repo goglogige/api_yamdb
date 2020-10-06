@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -49,7 +49,6 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=200)
     year = models.IntegerField()
-    # description = models.CharField(max_length=200, null=True)
     genre = models.ManyToManyField(
         Genre,
         related_name="titles_genre",
@@ -60,7 +59,6 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
         related_name="titles_category"
     )
-    rating = models.IntegerField(blank=True, null=True)
     description = models.TextField(
         null=True, blank=True
     )
@@ -81,11 +79,14 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name="reviews"
     )
-    score = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
+    score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     pub_date = models.DateTimeField("Дата отзыва", auto_now_add=True)
 
     def __str__(self):
         return self.text
+
+    class Meta:
+        unique_together = ['author', 'title']
 
 
 class Comment(models.Model):
