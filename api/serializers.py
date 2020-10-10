@@ -72,7 +72,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context["request"].user.id,
         title = self.context["view"].kwargs.get("title_id")
         message = 'Author review already exist'
-        if not self.instance and Review.objects.filter(title=title, author=author).exists():
+        if not self.instance and Review.objects.filter(
+                title=title,
+                author=author
+        ).exists():
             raise serializers.ValidationError(message)
         return attrs
 
@@ -87,4 +90,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-

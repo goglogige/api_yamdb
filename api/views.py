@@ -3,7 +3,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, serializers, status, viewsets
+from rest_framework import filters, generics, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
@@ -223,4 +223,3 @@ class CommentViewSet(viewsets.ModelViewSet):
             review=review
         )
         return super().partial_update(request, *args, **kwargs)
-

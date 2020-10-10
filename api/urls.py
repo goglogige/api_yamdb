@@ -11,9 +11,16 @@ router = DefaultRouter()
 
 router.register(r'users', UsersViewSet, basename='users')
 router.register(r'titles', TitleViewSet)
-router.register(r'titles/(?P<title_id>[0-9]+)/reviews', ReviewViewSet, basename='reviews')
-router.register(r'titles/(?P<title_id>[0-9]+)/reviews/(?P<review_id>[0-9]+)/comments',
-                CommentViewSet, basename='comments')
+router.register(
+    r'titles/(?P<title_id>[0-9]+)/reviews',
+    ReviewViewSet,
+    basename='reviews'
+)
+router.register(
+    r'titles/(?P<title_id>[0-9]+)/reviews/(?P<review_id>[0-9]+)/comments',
+    CommentViewSet,
+    basename='comments'
+)
 
 authorization = [
     path('email/', confirm_email),

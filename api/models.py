@@ -83,13 +83,15 @@ class Title(models.Model):
     year = models.IntegerField()
     genre = models.ManyToManyField(
         Genre,
-        related_name="titles_genre",
+        related_name='titles_genre',
+        verbose_name='title genre'
     )
     category = models.ForeignKey(
         Category, blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="titles_category"
+        related_name='titles_category',
+        verbose_name='title category'
     )
     description = models.TextField(
         null=True, blank=True
@@ -103,22 +105,34 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name="reviews"
+        related_name='reviews',
     )
     text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="reviews"
+        related_name='author',
     )
-    score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
-    pub_date = models.DateTimeField("Дата отзыва", auto_now_add=True)
+    score = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10)
+        ]
+    )
+    pub_date = models.DateTimeField(
+        'review publication date',
+        auto_now_add=True,
+        db_index=True
+    )
 
     def __str__(self):
         return self.text
 
     class Meta:
         unique_together = ['author', 'title']
+        verbose_name = 'review'
+        verbose_name_plural = 'reviews'
+        ordering = [F('pub_date').asc(nulls_last=True)]
 
 
 class Comment(models.Model):
@@ -126,14 +140,23 @@ class Comment(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="comments"
+        related_name='comments'
     )
-    pub_date = models.DateTimeField("Дата комментария", auto_now_add=True, db_index=True)
+    pub_date = models.DateTimeField(
+        'comment publication date',
+        auto_now_add=True,
+        db_index=True
+    )
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name="comments"
+        related_name='comments'
     )
 
     def __str__(self):
         return self.text
+
+    class Meta:
+        verbose_name = 'comment'
+        verbose_name_plural = 'comments'
+        ordering = [F('pub_date').asc(nulls_last=True)]

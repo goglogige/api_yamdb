@@ -31,6 +31,8 @@ class IsAuthorOrIsStaffPermission(BasePermission):
             return (obj.author == request.user or
                     request.user.is_staff or
                     request.user.is_superuser or
-                    request.user.get_role in [UserRole.ADMIN, UserRole.MODERATOR])
+                    request.user.get_role in [
+                        UserRole.ADMIN,
+                        UserRole.MODERATOR
+                    ])
         return True
-
