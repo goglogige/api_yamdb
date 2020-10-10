@@ -14,6 +14,7 @@ import os
 
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
@@ -155,11 +156,6 @@ EMAIL_USE_TLS = True
 # Настройка для использования нашей модели User вместо модели по умолчанию
 AUTH_USER_MODEL = "api.User"
 
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    # ],
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
 }
-

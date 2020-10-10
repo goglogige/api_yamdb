@@ -11,15 +11,16 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
-from .code import CODE
+from api_yamdb.settings import EMAIL_HOST_USER
 from .filters import TitleFilter
 from .models import Category, Genre, Review, Title, User
 from .permissions import IsAdministrator, IsAuthorOrIsStaffPermission, ReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           EmailSerializer, GenreSerializer, ReviewSerializer,
                           TitleListSerializer, TitlePostSerializer,
-                          UserCreateSerializer, UserSerializer)
+                          EmailCodeSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -27,42 +28,39 @@ from .serializers import (CategorySerializer, CommentSerializer,
 @ensure_csrf_cookie
 def confirm_email(request):
     serializer = EmailSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
     email = serializer.data['email']
+    user = User.objects.get_or_create(email=email)[0]
+    confirmation_code = PasswordResetTokenGenerator().make_token(user)
     send_mail(
         'Confirmation code',
-        f'You confirmation code: {CODE}.',
-        'evg.katolichenko@gmail.com',
+        f'You confirmation code: {confirmation_code}',
+        EMAIL_HOST_USER,
         [email],
         fail_silently=False,
     )
-    return Response({'message': f'Confirmation code ****** sent to {email}'})
+    return Response(
+        {'message': f'Your confirmation code sent to {email}'},
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def registration(request):
-    serializer = UserCreateSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+    serializer = EmailCodeSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
     email = serializer.data['email']
+    user = User.objects.get(email=email)
+    # print('Я ТУТ!', user.last_login)
     confirmation_code = serializer.data['confirmation_code']
-    if confirmation_code != str(CODE):
-        raise serializers.ValidationError(
-            {"confirmation_code": "Confirmation code does not match."})
-    if User.objects.filter(email=email).count() == 0:
-        user = User.objects.create(email=email)
-    else:
-        user = User.objects.get(email=email)
-    token = RefreshToken.for_user(user)
-    user_exist = User.objects.filter(email=email).count()
-    return Response({
-        'token': f'{token.access_token}',
-        'user': f'{user}',
-        'user_exist': f'{user_exist}',
-    },
-        status=status.HTTP_200_OK)
+    if not PasswordResetTokenGenerator().check_token(user, confirmation_code):
+        return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
+    token = RefreshToken.for_user(user).access_token
+    return Response(
+        {'token': f'{token}'},
+        status=status.HTTP_200_OK
+    )
 
 
 class GetPatchYourProfile(APIView):

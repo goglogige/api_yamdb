@@ -7,16 +7,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'bio', 'email', 'role']
+        # '__all__' ломает проект, в AbstractUser есть доп. поля:
+        fields = (
+            'id', 'first_name', 'last_name', 'username',
+            'bio', 'email', 'role',
+        )
 
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=75)
+    email = serializers.EmailField(max_length=75, required=True)
 
 
-class UserCreateSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=75)
-    confirmation_code = serializers.CharField(max_length=10)
+class EmailCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=75, required=True)
+    confirmation_code = serializers.CharField(max_length=2000, required=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
