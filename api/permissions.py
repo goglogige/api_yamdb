@@ -1,17 +1,17 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
+from .models import UserRole
+
 
 class IsAdministrator(BasePermission):
     message = "You can't do this!"
 
     def has_permission(self, request, view):
-        return bool(
-            request.user.is_authenticated and (
-                request.user.role == 'admin' or
+        return (request.user.is_authenticated and (
+                request.user.get_role == UserRole.ADMIN or
                 request.user.is_staff or
                 request.user.is_superuser
-            )
-        )
+                ))
 
 
 class ReadOnly(BasePermission):
@@ -30,6 +30,8 @@ class IsAuthorOrIsStaffPermission(BasePermission):
             return (obj.author == request.user or
                     request.user.is_staff or
                     request.user.is_superuser or
-                    request.user.role in ['admin', 'moderator'])
+                    request.user.get_role in [
+                        UserRole.ADMIN,
+                        UserRole.MODERATOR
+                    ])
         return True
-

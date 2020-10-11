@@ -7,16 +7,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'bio', 'email', 'role']
+        # '__all__' ломает проект, в AbstractUser есть доп. поля:
+        fields = (
+            'id', 'first_name', 'last_name', 'username',
+            'bio', 'email', 'role',
+        )
 
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=75)
+    email = serializers.EmailField(max_length=75, required=True)
 
 
-class UserCreateSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=75)
-    confirmation_code = serializers.CharField(max_length=10)
+class EmailCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=75, required=True)
+    confirmation_code = serializers.CharField(max_length=2000, required=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -42,10 +46,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id', 'name', 'year',
-            'description', 'genre', 'category',
-        )
+        fields = '__all__'
 
 
 class TitleListSerializer(serializers.ModelSerializer):
@@ -55,10 +56,7 @@ class TitleListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id', 'name', 'year', 'rating',
-            'description', 'genre', 'category',
-        )
+        fields = '__all__'
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -68,7 +66,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context["request"].user.id,
         title = self.context["view"].kwargs.get("title_id")
         message = 'Author review already exist'
-        if not self.instance and Review.objects.filter(title=title, author=author).exists():
+        if not self.instance and Review.objects.filter(
+                title=title,
+                author=author
+        ).exists():
             raise serializers.ValidationError(message)
         return attrs
 
@@ -83,4 +84,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-
