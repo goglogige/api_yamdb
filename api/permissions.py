@@ -11,8 +11,7 @@ class IsAdministrator(BasePermission):
                 request.user.get_role == UserRole.ADMIN or
                 request.user.is_staff or
                 request.user.is_superuser
-                )
-                )
+                ))
 
 
 class ReadOnly(BasePermission):

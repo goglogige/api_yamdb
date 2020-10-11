@@ -52,7 +52,6 @@ def registration(request):
     serializer.is_valid(raise_exception=True)
     email = serializer.data['email']
     user = User.objects.get(email=email)
-    # print('Я ТУТ!', user.last_login)
     confirmation_code = serializer.data['confirmation_code']
     if not PasswordResetTokenGenerator().check_token(user, confirmation_code):
         return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
