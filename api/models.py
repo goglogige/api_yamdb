@@ -80,7 +80,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=200)
-    year = models.IntegerField()
+    year = models.IntegerField(validators=[MaxValueValidator])
     genre = models.ManyToManyField(
         Genre,
         related_name='titles_genre',
