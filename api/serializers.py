@@ -46,10 +46,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id', 'name', 'year',
-            'description', 'genre', 'category',
-        )
+        fields = '__all__'
 
 
 class TitleListSerializer(serializers.ModelSerializer):
@@ -59,10 +56,7 @@ class TitleListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id', 'name', 'year', 'rating',
-            'description', 'genre', 'category',
-        )
+        fields = '__all__'
 
 
 class ReviewSerializer(serializers.ModelSerializer):
