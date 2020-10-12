@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F
+from datetime import datetime
 
 
 class UserRole(models.TextChoices):
@@ -80,7 +81,12 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=200)
-    year = models.IntegerField(validators=[MaxValueValidator])
+    year = models.IntegerField(
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(datetime.now().year)
+        ]
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles_genre',
