@@ -62,42 +62,33 @@ def registration(request):
     )
 
 
-class GetPatchYourProfile(APIView):
-    def get(self, request):
-        user = get_object_or_404(User, email=request.user.email)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        user = get_object_or_404(User, email=request.user.email)
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if not serializer.is_valid(raise_exception=True):
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = [IsAdministrator]
+    permission_classes = [IsAuthenticated, IsAdministrator]
     lookup_field = 'username'
 
-    @action(detail=True, methods=['GET', 'POST'])
-    def get_create_users(self, request):
-        users_list = User.objects.all()
-        serializer = UserSerializer(users_list, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    def get_permissions(self):
+        if self.action is 'profile':
+            return [IsAuthenticated()]
+        return super().get_permissions()
 
-    @action(detail=True, methods=['GET', 'PATCH', 'DELETE'])
-    def actions_users(self, request):
-        user = get_object_or_404(User, username=self.request.data['username'])
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    @action(
+        detail=True,
+        methods=['GET', 'PATCH', 'DELETE']
+    )
+    def profile(self, request):
+        if request.method == 'GET':
+            user = request.user
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PATCH':
+            user = request.user
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class CategoryListCreate(generics.ListCreateAPIView):

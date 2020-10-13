@@ -44,10 +44,9 @@ class User(AbstractUser):
         verbose_name='role',
     )
 
-    def __get_user_role(self):
+    @property
+    def get_role(self):
         return self.role
-
-    get_role = property(__get_user_role)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
